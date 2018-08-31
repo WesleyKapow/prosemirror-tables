@@ -21,8 +21,10 @@ function setCellAttrs(node, extraAttrs) {
   let attrs = {}
   if (node.attrs.colspan != 1) attrs.colspan = node.attrs.colspan
   if (node.attrs.rowspan != 1) attrs.rowspan = node.attrs.rowspan
-  if (node.attrs.colwidth)
+  if (node.attrs.colwidth) {
     attrs["data-colwidth"] = node.attrs.colwidth.join(",")
+    attrs["style"] = `width: ${node.attrs.colwidth[0]}px;`
+  }
   for (let prop in extraAttrs) {
     let setter = extraAttrs[prop].setDOMAttr
     if (setter) setter(node.attrs[prop], attrs)
@@ -76,8 +78,18 @@ export function tableNodes(options) {
       tableRole: "table",
       isolating: true,
       group: options.tableGroup,
-      parseDOM: [{tag: "table"}],
-      toDOM() { return ["table", ["tbody", 0]] }
+      parseDOM: [{tag: "div[class='table-wrapper']"}],
+      toDOM(node) {
+        const firstRow = node.child(0)
+        let totalWidth = 0;
+        for (let i=0; i < firstRow.childCount; i++) {
+          const colwidth = firstRow.child(i).attrs.colwidth
+          totalWidth += colwidth && colwidth.length ? colwidth[0] : 0
+        }
+        return ["div", {class: 'table-wrapper'}, [
+          "table", totalWidth ? {style: `width: ${totalWidth}px`} : {}, ["tbody", 0]
+        ]]
+      }
     },
     table_row: {
       content: "(table_cell | table_header)*",

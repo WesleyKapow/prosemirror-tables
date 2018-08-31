@@ -1,7 +1,7 @@
 import {Plugin, PluginKey} from "prosemirror-state"
 import {Decoration, DecorationSet} from "prosemirror-view"
 import {cellAround, pointsAtCell, setAttr} from "./util"
-import {TableMap} from "./tablemap"
+import {TableMap, Rect} from "./tablemap"
 import {TableView, updateColumns} from "./tableview"
 import {tableNodeTypes} from "./schema"
 
@@ -104,6 +104,9 @@ function handleMouseDown(view, event, cellMinWidth) {
 
   let cell = view.state.doc.nodeAt(pluginState.activeHandle)
   let width = currentColWidth(view, pluginState.activeHandle, cell.attrs)
+  if (!cell.attrs.colwidth) {
+    fixAllColumnWidths(view, pluginState.activeHandle)
+  }
   view.dispatch(view.state.tr.setMeta(key, {setDragging: {startX: event.clientX, startWidth: width}}))
 
   function finish(event) {
@@ -164,6 +167,21 @@ function draggedWidth(dragging, event, cellMinWidth) {
 
 function updateHandle(view, value) {
   view.dispatch(view.state.tr.setMeta(key, {setHandle: value}))
+}
+
+// Set the width of all columns.
+// This way, changing a single column width will NOT change the width of the other columns.
+// We do this as soon as a user resizes a column and not on the initialization of the table so
+// that adding/removing columns will stay balanced (until user resizes one).
+function fixAllColumnWidths(view, currentCell) {
+  let $cell = view.state.doc.resolve(currentCell)
+  let table = $cell.node(-1), map = TableMap.get(table), start = $cell.start(-1)
+  let cells = map.cellsInRect(new Rect(0, 0, map.width, 1));
+  for (let i = 0; i < cells.length; i++) {
+    let $cell2 = view.state.doc.resolve(start + cells[i])
+    let width = currentColWidth(view, start + cells[i], $cell2.nodeAfter.attrs)
+    updateColumnWidth(view, start + cells[i], width);
+  }
 }
 
 function updateColumnWidth(view, cell, width) {

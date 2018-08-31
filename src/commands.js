@@ -9,6 +9,8 @@ import {setAttr, addColSpan, rmColSpan, moveCellForward, isInTable, selectionCel
 import {tableNodeTypes} from "./schema"
 import {cellWrapping, cellAround} from './util'
 
+const DEFAULT_FIXED_COLUMN_WIDTH = 100;
+
 // Helper to get the selected rectangle in a table, if any. Adds table
 // map, table node, and table start offset to the object for
 // convenience.
@@ -50,10 +52,12 @@ export function addColumn(tr, {map, tableStart, table}, col) {
       // Skip ahead if rowspan > 1
       row += cell.attrs.rowspan - 1
     } else {
+      // First cell should have width set on it, if this table already has widths.
+      const hasWidth = table.child(0).child(0).attrs.colwidth && table.child(0).child(0).attrs.colwidth.length;
       let type = refColumn == null ? tableNodeTypes(table.type.schema).cell
           : table.nodeAt(map.map[index + refColumn]).type
       let pos = map.positionAt(row, col, table)
-      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill())
+      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill(hasWidth ? {colwidth: [DEFAULT_FIXED_COLUMN_WIDTH]} : null))
     }
   }
   return tr

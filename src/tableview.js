@@ -3,7 +3,7 @@ export class TableView {
     this.node = node
     this.cellMinWidth = cellMinWidth
     this.dom = document.createElement("div")
-    this.dom.className = "tableWrapper"
+    this.dom.className = "table-wrapper"
     this.table = this.dom.appendChild(document.createElement("table"))
     this.colgroup = this.table.appendChild(document.createElement("colgroup"))
     updateColumns(node, this.colgroup, this.table, cellMinWidth)
