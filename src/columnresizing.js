@@ -210,6 +210,11 @@ function displayColumnWidth(view, cell, width, cellMinWidth) {
   let dom = view.domAtPos($cell.start(-1)).node
   while (dom.nodeName != "TABLE") dom = dom.parentNode
   updateColumns(table, dom.firstChild, dom, cellMinWidth, col, width)
+
+  // Let any listeners know that things got resized, bound to window.
+  var resizeEvent = window.document.createEvent('UIEvents');
+  resizeEvent.initUIEvent('resize', true, false, window, 0);
+  window.dispatchEvent(resizeEvent);
 }
 
 function zeroes(n) {
