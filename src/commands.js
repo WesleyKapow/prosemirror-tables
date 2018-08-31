@@ -347,11 +347,66 @@ function toggleHeader(type) {
       let cells = rect.map.cellsInRect(type == "column" ? new Rect(rect.left, 0, rect.right, rect.map.height) :
                                        type == "row" ? new Rect(0, rect.top, rect.map.width, rect.bottom) : rect)
       let nodes = cells.map(pos => rect.table.nodeAt(pos))
-      for (let i = 0; i < cells.length; i++) // Remove headers, if any
-        if (nodes[i].type == types.header_cell)
-          tr.setNodeMarkup(rect.tableStart + cells[i], types.cell, nodes[i].attrs)
-      if (tr.steps.length == 0) for (let i = 0; i < cells.length; i++) // No headers removed, add instead
-        tr.setNodeMarkup(rect.tableStart + cells[i], types.header_cell, nodes[i].attrs)
+
+      // If we're togglign cells, then it's simple, just flip whatever the cell currently is.
+      if (type == 'cell') {
+        for (let i = 0; i < cells.length; i++)
+          tr.setNodeMarkup(
+            rect.tableStart + cells[i],
+            nodes[i].type == types.header_cell ? types.cell : types.header_cell,
+            nodes[i].attrs)
+        dispatch(tr)
+        return;
+      }
+
+      // A helper that determines if all of the cells in a column or row are headers.
+      const allHeaders = (type, index) => {
+        let checkCells = rect.map.cellsInRect(type == "column"
+          ? new Rect(index, 0, index + 1, rect.map.height)
+          : new Rect(0, index, rect.map.width, index + 1))
+        let checkNodes = checkCells.map(pos => rect.table.nodeAt(pos))
+        for (let i = 0; i < checkCells.length; i++) {
+          if (checkNodes[i].type == types.cell) { return false; }
+        }
+        return true;
+      }
+
+
+      // Toggle headers on if there's at least one cell without the header.
+      let toggleOn = false
+      for (let i = 0; i < cells.length; i++) {
+        if (nodes[i].type == types.cell) {
+          toggleOn = true;
+          break;
+        }
+      }
+
+      // Toggle them!
+      if (toggleOn) {
+        for (let i = 0; i < cells.length; i++) {
+          if (nodes[i].type == types.cell) {
+            tr.setNodeMarkup(rect.tableStart + cells[i], types.header_cell, nodes[i].attrs)
+          }
+        }
+      } else {
+        let toggledAny = false
+        for (let i = 0; i < cells.length; i++) {
+          // We need to ignore any cells that belong to a header column/row.
+          // That way toggling a column off won't toggle off any cells belonging to header rows.
+          if (!allHeaders(type == 'column' ? 'row' : 'column', i)) {
+            toggledAny = true
+            tr.setNodeMarkup(rect.tableStart + cells[i], types.cell, nodes[i].attrs)
+          }
+        }
+
+        // Special case when entire table is a header, we can safely toggle off the entire row/column.
+        if (!toggledAny) {
+          for (let i = 0; i < cells.length; i++) {
+            tr.setNodeMarkup(rect.tableStart + cells[i], types.cell, nodes[i].attrs)
+          }
+        }
+      }
+
       dispatch(tr)
     }
     return true
