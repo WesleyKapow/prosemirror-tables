@@ -1,3 +1,15 @@
+# Fork of public repo: prosemirror-tables
+
+Followed [GitHub: How to make a fork of public repository private?](https://medium.com/@bilalbayasut/github-how-to-make-a-fork-of-public-repository-private-6ee8cacaf9d3) to set this up.
+
+Re-up with public repo:
+```
+git remote add public https://github.com/exampleuser/public-repo.git
+git pull public master # Creates a merge commit
+git push origin master
+
+```
+
 # ProseMirror table module
 
 This module defines a schema extension to support tables with
