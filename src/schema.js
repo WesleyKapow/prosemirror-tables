@@ -75,6 +75,8 @@ export function tableNodes(options) {
   return {
     table: {
       content: "table_row+",
+      draggable: true,
+      draggingIcon: "icon-table",
       tableRole: "table",
       isolating: true,
       group: options.tableGroup,
