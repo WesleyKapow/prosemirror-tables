@@ -8,20 +8,24 @@ import {keydownHandler} from "prosemirror-keymap"
 import {key, nextCell, cellAround, inSameTable,
         isInTable, selectionCell} from "./util"
 import {CellSelection} from "./cellselection"
+import {goToNextCell} from "./commands"
 import {TableMap} from "./tablemap"
 import {pastedCells, fitSlice, clipCells, insertCells} from "./copypaste"
 import {tableNodeTypes} from "./schema"
 
 export const handleKeyDown = keydownHandler({
+  "Shift-Tab": goToNextCell(-1),
+  "Tab": goToNextCell(1),
+
   "ArrowLeft": arrow("horiz", -1),
   "ArrowRight": arrow("horiz", 1),
   "ArrowUp": arrow("vert", -1),
   "ArrowDown": arrow("vert", 1),
 
-  "Shift-ArrowLeft": shiftArrow("horiz", -1),
-  "Shift-ArrowRight": shiftArrow("horiz", 1),
-  "Shift-ArrowUp": shiftArrow("vert", -1),
-  "Shift-ArrowDown": shiftArrow("vert", 1),
+  // "Shift-ArrowLeft": shiftArrow("horiz", -1),
+  // "Shift-ArrowRight": shiftArrow("horiz", 1),
+  // "Shift-ArrowUp": shiftArrow("vert", -1),
+  // "Shift-ArrowDown": shiftArrow("vert", 1),
 
   "Backspace": deleteCellSelection,
   "Mod-Backspace": deleteCellSelection,
