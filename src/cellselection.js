@@ -8,7 +8,7 @@ import {Decoration, DecorationSet} from "prosemirror-view"
 import {Fragment, Slice} from "prosemirror-model"
 
 
-import {inSameTable, pointsAtCell, setAttr, rmColSpan} from "./util"
+import {cellAround, inSameTable, isPosInTable, pointsAtCell, setAttr, rmColSpan} from "./util"
 import {TableMap} from "./tablemap"
 
 // ::- A [`Selection`](http://prosemirror.net/docs/ref/#state.Selection)
@@ -264,6 +264,22 @@ export function normalizeSelection(state, tr) {
     }
   } else if (sel instanceof TextSelection && isCellBoundarySelection(sel)) {
     normalize = TextSelection.create(doc, sel.from)
+  } else if (sel instanceof TextSelection && !sel.empty) {
+    // Fix up any selections that are trying to select only part of the table.
+    // Partial selections lead to partial deletions which leads to problems.
+    // Instead we extend the selection to cover the entire table.
+    let tableAtStart = isPosInTable(sel.$from)
+    let tableAtEnd = isPosInTable(sel.$to)
+    if (tableAtStart != tableAtEnd) {
+      if (tableAtEnd) {
+        let $toCell = cellAround(sel.$to)
+        if ($toCell) normalize = TextSelection.create(doc, sel.from, $toCell.end(-1))
+      }
+      if (tableAtStart) {
+        let $fromCell = cellAround(sel.$from)
+        if ($fromCell) normalize = TextSelection.create(doc, sel.to, $fromCell.start(-1))
+      }
+    }
   }
   if (normalize)
     (tr || (tr = state.tr)).setSelection(normalize)

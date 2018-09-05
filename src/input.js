@@ -22,10 +22,10 @@ export const handleKeyDown = keydownHandler({
   "ArrowUp": arrow("vert", -1),
   "ArrowDown": arrow("vert", 1),
 
-  // "Shift-ArrowLeft": shiftArrow("horiz", -1),
-  // "Shift-ArrowRight": shiftArrow("horiz", 1),
-  // "Shift-ArrowUp": shiftArrow("vert", -1),
-  // "Shift-ArrowDown": shiftArrow("vert", 1),
+  "Shift-ArrowLeft": shiftArrow("horiz", -1),
+  "Shift-ArrowRight": shiftArrow("horiz", 1),
+  "Shift-ArrowUp": shiftArrow("vert", -1),
+  "Shift-ArrowDown": shiftArrow("vert", 1),
 
   "Backspace": deleteCellSelection,
   "Mod-Backspace": deleteCellSelection,
@@ -91,12 +91,16 @@ function arrow(axis, dir) {
 function shiftArrow(axis, dir) {
   return (state, dispatch, view) => {
     let sel = state.selection
+    let $headCell = cellAround(state.doc.resolve(sel.head))
+    let $anchorCell = cellAround(state.doc.resolve(sel.anchor))
     if (!(sel instanceof CellSelection)) {
       let end = atEndOfCell(view, axis, dir)
       if (end == null) return false
       sel = new CellSelection(state.doc.resolve(end))
+      return maybeSetSelection(state, dispatch, new CellSelection(sel.$anchorCell, sel.$headCell))
     }
     let $head = nextCell(sel.$headCell, axis, dir)
+    if (!$head) $head = nextCell(sel.$headCell, 'vert', dir)
     if (!$head) return false
     return maybeSetSelection(state, dispatch, new CellSelection(sel.$anchorCell, $head))
   }

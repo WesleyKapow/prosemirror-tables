@@ -21,8 +21,11 @@ export function cellWrapping($pos) {
 }
 
 export function isInTable(state) {
-  let $head = state.selection.$head
-  for (let d = $head.depth; d > 0; d--) if ($head.node(d).type.spec.tableRole == "row") return true
+  return isPosInTable(state.selection.$head)
+}
+
+export function isPosInTable($pos) {
+  for (let d = $pos.depth; d > 0; d--) if ($pos.node(d).type.spec.tableRole == "row") return true
   return false
 }
 
