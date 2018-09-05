@@ -96,6 +96,7 @@ export function tableNodes(options) {
     table_row: {
       content: "(table_cell | table_header)*",
       tableRole: "row",
+      isolating: true,
       parseDOM: [{tag: "tr"}],
       toDOM() { return ["tr", 0] }
     },
