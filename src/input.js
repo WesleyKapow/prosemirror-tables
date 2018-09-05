@@ -45,13 +45,41 @@ function arrow(axis, dir) {
     if (sel instanceof CellSelection) {
       return maybeSetSelection(state, dispatch, Selection.near(sel.$headCell, dir))
     }
-    if (axis != "horiz" && !sel.empty) return false
-    let end = atEndOfCell(view, axis, dir)
-    if (end == null) return false
     if (axis == "horiz") {
       return maybeSetSelection(state, dispatch, Selection.near(state.doc.resolve(sel.head + dir), dir))
     } else {
-      let $cell = state.doc.resolve(end), $next = nextCell($cell, axis, dir), newSel
+      let $cell = cellAround(state.doc.resolve(sel.head))
+      let $next, newSel
+
+      // We must not be in the table yet.
+      if ($cell == null) {
+        // Try and get a position into the table, use try/catch as position may be out of doc range.
+        try {
+          let $pos = state.doc.resolve(sel.head + (dir * 5))
+          $cell = cellAround($pos)
+        } catch (exception) {
+          return false
+        }
+
+        // In case we still aren't in the table.
+        if ($cell == null) { return false }
+
+        if (dir == 1) {
+          // When moving forward, the first $cell is what we want.
+          $next = $cell
+        } else {
+          // Loop to the beginning of the last row!
+          const table = TableMap.get($cell.node(-1))
+          let temp = $cell
+          for (let i = 1; i < table.width; i++) {
+            temp = nextCell(temp, 'horiz', -1)
+          }
+          $next = temp
+        }
+      } else {
+        $next = nextCell($cell, axis, dir)
+      }
+
       if ($next) newSel = Selection.near($next, 1)
       else if (dir < 0) newSel = Selection.near(state.doc.resolve($cell.before(-1)), -1)
       else newSel = Selection.near(state.doc.resolve($cell.after(-1)), 1)
