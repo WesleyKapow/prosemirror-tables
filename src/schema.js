@@ -65,9 +65,8 @@ function setCellAttrs(node, extraAttrs) {
 export function tableNodes(options) {
   let extraAttrs = options.cellAttributes || {}
   let cellAttrs = {
-    // Disable col and row span for now (makes copy paste more reliable while we don't currently support split and merging cells)
-    // colspan: {default: 1},
-    // rowspan: {default: 1},
+    colspan: {default: 1},
+    rowspan: {default: 1},
     colwidth: {default: null}
   }
   for (let prop in extraAttrs)
