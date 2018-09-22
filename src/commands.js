@@ -480,3 +480,24 @@ export function deleteTable(state, dispatch) {
   }
   return false
 }
+
+// :: (EditorState, ?(tr: Transaction)) → bool
+// Removes all 'colwidth' attributes, thus making columns have equal width and the table span 100%.
+export function distributeColumns(state, dispatch) {
+  if (!isInTable(state)) return false
+
+  let sel = state.selection, $pos = selectionCell(state)
+  let table = $pos.node(-1), tableStart = $pos.start(-1), map = TableMap.get(table)
+  let tr = state.tr
+
+  for (let row = 0; row < map.height; row++) {
+    for (let col = 0; col < map.width; col++) {
+      let index = row * map.width + col
+      let pos = map.map[index], cell = table.nodeAt(pos)
+      let attrs = table.nodeAt(pos).attrs
+      tr.setNodeMarkup(tr.mapping.map(tableStart + pos), null, setAttr(attrs, 'colwidth', null))
+    }
+  }
+
+  dispatch(tr)
+}
