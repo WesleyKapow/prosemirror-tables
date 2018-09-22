@@ -35,7 +35,7 @@ export const handleKeyDown = keydownHandler({
 
 function maybeSetSelection(state, dispatch, selection) {
   if (selection.eq(state.selection)) return false
-  if (dispatch) dispatch(state.tr.setSelection(selection))
+  if (dispatch) dispatch(state.tr.setSelection(selection).scrollIntoView())
   return true
 }
 
