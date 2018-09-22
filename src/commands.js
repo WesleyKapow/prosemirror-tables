@@ -109,12 +109,21 @@ export function deleteColumn(state, dispatch) {
     let rect = selectedRect(state), tr = state.tr
     if (rect.map.width == 1) { return deleteTable(state, dispatch); }
     if (rect.left == 0 && rect.right == rect.map.width) return false
+
+    // Get current position and find next cell position.
+    let pos = rect.map.positionAt(rect.top, rect.left, rect.table)
+    let nextPos = rect.map.nextCell(pos, 'horiz', rect.left === 0 ? 1 : -1) + rect.tableStart
+
+    // Do the column(s) removal.
     for (let i = rect.right - 1;; i--) {
       removeColumn(tr, rect, i)
       if (i == rect.left) break
       rect.table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc
       rect.map = TableMap.get(rect.table)
     }
+
+    // Bump our selection to an adjacent column.
+    tr.setSelection(TextSelection.create(tr.doc, tr.mapping.map(nextPos)))
     dispatch(tr)
   }
   return true
@@ -206,12 +215,21 @@ export function deleteRow(state, dispatch) {
     let rect = selectedRect(state), tr = state.tr
     if (rect.map.height == 1) { return deleteTable(state, dispatch); }
     if (rect.top == 0 && rect.bottom == rect.map.height) return false
+
+    // Get current position and find next cell position.
+    let pos = rect.map.positionAt(rect.top, rect.left, rect.table)
+    let nextPos = rect.map.nextCell(pos, 'vert', rect.top === 0 ? 1 : -1) + rect.tableStart
+
+    // Do the row(s) removal.
     for (let i = rect.bottom - 1;; i--) {
       removeRow(tr, rect, i)
       if (i == rect.top) break
       rect.table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc
       rect.map = TableMap.get(rect.table)
     }
+
+    // Bump our selection to an adjacent row.
+    tr.setSelection(TextSelection.create(tr.doc, tr.mapping.map(nextPos)))
     dispatch(tr)
   }
   return true
