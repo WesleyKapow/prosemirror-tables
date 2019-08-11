@@ -18,7 +18,7 @@ export class TableView {
   }
 
   ignoreMutation(record) {
-    return record.type == "attributes" && (record.target == this.table || this.colgroup.contains(record.target))
+    return record.type == "attributes" && (record.target == this.dom || record.target == this.table || this.colgroup.contains(record.target))
   }
 }
 
@@ -48,10 +48,10 @@ export function updateColumns(node, colgroup, table, cellMinWidth, overrideCol, 
   }
 
   if (fixedWidth) {
-    table.style.width = totalWidth + "px"
-    table.style.minWidth = ""
+    table.parentNode.style.width = totalWidth + 1 + "px" // 1 extra to fix non-needed scrollbar bug
+    table.parentNode.style.minWidth = ""
   } else {
-    table.style.width = ""
-    table.style.minWidth = totalWidth + "px"
+    table.parentNode.style.width = ""
+    table.parentNode.style.minWidth = totalWidth + 1 + "px" // 1 extra to fix non-needed scrollbar bug
   }
 }

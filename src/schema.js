@@ -88,8 +88,9 @@ export function tableNodes(options) {
           const colwidth = firstRow.child(i).attrs.colwidth
           totalWidth += colwidth && colwidth.length ? colwidth[0] : 0
         }
-        return ["div", {class: 'table-wrapper'}, [
-          "table", totalWidth ? {style: `width: ${totalWidth}px`} : {}, ["tbody", 0]
+        const style = totalWidth ? `width: ${totalWidth + 1}px` : '' // 1 extra to fix non-needed scrollbar bug
+        return ["div", {class: 'table-wrapper', style}, [
+          "table", ["tbody", 0]
         ]]
       }
     },
