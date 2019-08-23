@@ -80,7 +80,7 @@ export function tableNodes(options) {
       tableRole: "table",
       isolating: true,
       group: options.tableGroup,
-      parseDOM: [{tag: "div[class='table-wrapper']"}],
+      parseDOM: [{tag: "div[class='table-outer']"}],
       toDOM(node) {
         const firstRow = node.child(0)
         let totalWidth = 0;
@@ -89,9 +89,9 @@ export function tableNodes(options) {
           totalWidth += colwidth && colwidth.length ? colwidth[0] : 0
         }
         const style = totalWidth ? `width: ${totalWidth + 1}px` : '' // 1 extra to fix non-needed scrollbar bug
-        return ["div", {class: 'table-wrapper', style}, [
-          "table", ["tbody", 0]
-        ]]
+        const table = ["table", ["tbody", 0]]
+        const tableWrapper = ["div", {class: 'table-wrapper', style}, table]
+        return ["div", {class: 'table-outer'}, tableWrapper]
       }
     },
     table_row: {

@@ -3,8 +3,10 @@ export class TableView {
     this.node = node
     this.cellMinWidth = cellMinWidth
     this.dom = document.createElement("div")
-    this.dom.className = "table-wrapper"
-    this.table = this.dom.appendChild(document.createElement("table"))
+    this.dom.className = "table-outer"
+    this.wrapper = this.dom.appendChild(document.createElement("div"))
+    this.wrapper.className = "table-wrapper"
+    this.table = this.wrapper.appendChild(document.createElement("table"))
     this.colgroup = this.table.appendChild(document.createElement("colgroup"))
     updateColumns(node, this.colgroup, this.table, cellMinWidth)
     this.contentDOM = this.table.appendChild(document.createElement("tbody"))
@@ -18,7 +20,7 @@ export class TableView {
   }
 
   ignoreMutation(record) {
-    return record.type == "attributes" && (record.target == this.dom || record.target == this.table || this.colgroup.contains(record.target))
+    return record.type == "attributes" && (record.target == this.dom || record.target == this.wrapper || record.target == this.table || this.colgroup.contains(record.target))
   }
 }
 
