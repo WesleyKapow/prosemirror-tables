@@ -75,6 +75,7 @@ export function tableNodes(options) {
   return {
     table: {
       content: "table_row+",
+      attrs: {width: {default: null}, minWidth: {default: null}},
       draggable: true,
       draggingIcon: "icon-table",
       tableRole: "table",
@@ -82,15 +83,14 @@ export function tableNodes(options) {
       group: options.tableGroup,
       parseDOM: [{tag: "div[class='table-outer']"}],
       toDOM(node) {
-        const firstRow = node.child(0)
-        let totalWidth = 0;
-        for (let i=0; i < firstRow.childCount; i++) {
-          const colwidth = firstRow.child(i).attrs.colwidth
-          totalWidth += colwidth && colwidth.length ? colwidth[0] : 0
-        }
-        const style = totalWidth ? `width: ${totalWidth + 1}px` : '' // 1 extra to fix non-needed scrollbar bug
-        const table = ["table", ["tbody", 0]]
-        const tableWrapper = ["div", {class: 'table-wrapper', style}, table]
+        // Grab our styles.
+        const {minWidth, width} = node.attrs
+        const tableStyle = minWidth ? {style: `min-width: ${node.attrs.minWidth}px`} : {}
+        const tableWrapperStyle = width ? {style: `width: ${node.attrs.width}px`} : {}
+
+        // Create our table-outer -> table-wrapper -> table DOM.
+        const table = ["table", tableStyle, ["tbody", 0]]
+        const tableWrapper = ["div", Object.assign({class: 'table-wrapper'}, tableWrapperStyle), table]
         return ["div", {class: 'table-outer'}, tableWrapper]
       }
     },
