@@ -193,6 +193,7 @@ export function handleMouseDown(view, startEvent) {
   }
 
   function move(event) {
+    if (view.dragging) { return false }
     let anchor = key.getState(view.state), $anchor
     if (anchor != null) {
       // Continuing an existing cross-cell selection
