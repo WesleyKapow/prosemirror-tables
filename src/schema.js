@@ -75,7 +75,6 @@ export function tableNodes(options) {
   return {
     table: {
       content: "table_row+",
-      attrs: {width: {default: null}, minWidth: {default: null}},
       draggable: true,
       draggingIcon: "icon-table",
       tableRole: "table",
@@ -83,15 +82,29 @@ export function tableNodes(options) {
       group: options.tableGroup,
       parseDOM: [{tag: "div[class='table-outer']"}],
       toDOM(node) {
-        // Grab our styles.
-        const {minWidth, width} = node.attrs
-        const tableStyle = minWidth ? {style: `min-width: ${node.attrs.minWidth}px`} : {}
-        const tableWrapperStyle = width ? {style: `width: ${node.attrs.width}px`} : {}
+        // Copied from tableview in order to calculate our width and if we
+        // are fixed or not.
+        let totalWidth = 0, fixedWidth = true
+        const row = node.child(0)
+        for (let i = 0, col = 0; i < row.childCount; i++) {
+          let {colspan, colwidth} = row.child(i).attrs
+          for (let j = 0; j < colspan; j++, col++) {
+            let hasWidth = colwidth && colwidth[j]
+            totalWidth += hasWidth || options.cellMinWidth
+            if (!hasWidth) fixedWidth = false
+          }
+        }
+
+        // Replicate what our tableView does with either setting:
+        // * min-width on the table -- helps expand table (scroll)
+        // * width on the table-outer -- helps shrink table (< 100% width)
+        const tableStyle = !fixedWidth ? {style: `min-width: ${totalWidth + 1}px`} : {}
+        const tableOuterStyle = fixedWidth ? {style: `width: ${totalWidth + 1}px`} : {}
 
         // Create our table-outer -> table-wrapper -> table DOM.
         const table = ["table", tableStyle, ["tbody", 0]]
-        const tableWrapper = ["div", Object.assign({class: 'table-wrapper'}, tableWrapperStyle), table]
-        return ["div", {class: 'table-outer'}, tableWrapper]
+        const tableWrapper = ["div", {class: 'table-wrapper'}, table]
+        return ["div", Object.assign({class: 'table-outer'}, tableOuterStyle), tableWrapper]
       }
     },
     table_row: {

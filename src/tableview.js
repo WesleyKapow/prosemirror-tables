@@ -50,14 +50,10 @@ export function updateColumns(node, colgroup, table, cellMinWidth, overrideCol, 
   }
 
   if (fixedWidth) {
-    table.parentNode.style.width = totalWidth + 1 + "px" // 1 extra to fix non-needed scrollbar bug
+    table.parentNode.parentNode.style.width = totalWidth + 1 + "px" // 1 extra to fix non-needed scrollbar bug
     table.style.minWidth = ""
-    node.attrs.width = totalWidth + 1
-    node.attrs.minWidth = null
   } else {
-    node.attrs.width = null
-    table.parentNode.style.width = ""
-    node.attrs.minWidth = totalWidth + 1
+    table.parentNode.parentNode.style.width = ""
     table.style.minWidth = totalWidth + 1 + "px" // 1 extra to fix non-needed scrollbar bug
   }
 }
