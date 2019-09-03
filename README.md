@@ -10,6 +10,13 @@ git push origin master
 
 ```
 
+Use local module for dev.
+```
+npm link # within prosemirror-tables
+npm link prosemirror-tables # from other repo to use link
+npm unlink --no-save prosemirror-tables # to detach the link
+```
+
 # ProseMirror table module
 
 This module defines a schema extension to support tables with
