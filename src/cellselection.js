@@ -66,13 +66,13 @@ export class CellSelection extends Selection {
   content() {
     let table = this.$anchorCell.node(-1), map = TableMap.get(table), start = this.$anchorCell.start(-1)
     let rect = map.rectBetween(this.$anchorCell.pos - start, this.$headCell.pos - start)
-    let seen = [], rows = []
+    let seen = {}, rows = []
     for (let row = rect.top; row < rect.bottom; row++) {
       let rowContent = []
       for (let index = row * map.width + rect.left, col = rect.left; col < rect.right; col++, index++) {
         let pos = map.map[index]
-        if (seen.indexOf(pos) == -1) {
-          seen.push(pos)
+        if (!seen[pos]) {
+          seen[pos] = true
           let cellRect = map.findCell(pos), cell = table.nodeAt(pos)
           let extraLeft = rect.left - cellRect.left, extraRight = cellRect.right - rect.right
           if (extraLeft > 0 || extraRight > 0) {
@@ -249,7 +249,30 @@ function isCellBoundarySelection({$from, $to}) {
   return afterFrom == beforeTo && /row|table/.test($from.node(depth).type.spec.tableRole)
 }
 
-export function normalizeSelection(state, tr) {
+function isTextSelectionAcrossCells({$from, $to}) {
+  let fromCellBoundaryNode;
+  let toCellBoundaryNode;
+
+  for (let i = $from.depth; i > 0; i--) {
+    let node = $from.node(i);
+    if (node.type.spec.tableRole === 'cell' || node.type.spec.tableRole === 'header_cell') {
+      fromCellBoundaryNode = node;
+      break;
+    }
+  }
+
+  for (let i = $to.depth; i > 0; i--) {
+    let node = $to.node(i);
+    if (node.type.spec.tableRole === 'cell' || node.type.spec.tableRole === 'header_cell') {
+      toCellBoundaryNode = node;
+      break;
+    }
+  }
+
+  return fromCellBoundaryNode !== toCellBoundaryNode && $to.parentOffset === 0
+}
+
+export function normalizeSelection(state, tr, allowTableNodeSelection) {
   let sel = (tr || state).selection, doc = (tr || state).doc, normalize, role
   if (sel instanceof NodeSelection && (role = sel.node.type.spec.tableRole)) {
     if (role == "cell" || role == "header_cell") {
@@ -257,7 +280,7 @@ export function normalizeSelection(state, tr) {
     } else if (role == "row") {
       let $cell = doc.resolve(sel.from + 1)
       normalize = CellSelection.rowSelection($cell, $cell)
-    } else {
+    } else if (!allowTableNodeSelection) {
       let map = TableMap.get(sel.node), start = sel.from + 1
       let lastCell = start + map.map[map.width * map.height - 1]
       normalize = CellSelection.create(doc, start + 1, lastCell)
@@ -280,6 +303,8 @@ export function normalizeSelection(state, tr) {
         if ($fromCell) normalize = TextSelection.create(doc, sel.to, $fromCell.start(-1))
       }
     }
+  } else if (sel instanceof TextSelection && isTextSelectionAcrossCells(sel)) {
+    normalize = TextSelection.create(doc, sel.$from.start(), sel.$from.end());
   }
   if (normalize)
     (tr || (tr = state.tr)).setSelection(normalize)
