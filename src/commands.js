@@ -383,7 +383,7 @@ function deprecated_toggleHeader(type) {
                                        type == "row" ? new Rect(0, rect.top, rect.map.width, rect.bottom) : rect)
       let nodes = cells.map(pos => rect.table.nodeAt(pos))
 
-      // If we're togglign cells, then it's simple, just flip whatever the cell currently is.
+      // If we're toggling cells, then it's simple, just flip whatever the cell currently is.
       if (type == 'cell') {
         for (let i = 0; i < cells.length; i++)
           tr.setNodeMarkup(
@@ -405,7 +405,6 @@ function deprecated_toggleHeader(type) {
         }
         return true;
       }
-
 
       // Toggle headers on if there's at least one cell without the header.
       let toggleOn = false

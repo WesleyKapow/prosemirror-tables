@@ -110,7 +110,7 @@ export function tableNodes(options) {
     table_row: {
       content: "(table_cell | table_header)*",
       tableRole: "row",
-      isolating: true,
+      isolating: true, // XXX is this needed? https://github.com/wes-r/prosemirror-tables/commit/6808a96a377924d3a71e4f7f643fd615ab672539
       parseDOM: [{tag: "tr"}],
       toDOM() { return ["tr", 0] }
     },
